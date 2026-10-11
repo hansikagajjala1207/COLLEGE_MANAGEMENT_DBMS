@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance - College Management System{% endblock %}
+{% block page_title %}Attendance Management{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    <!-- 1. Mark Attendance Form -->
+    <div class="col-12 col-xl-5">
+        <div class="card border-0 shadow-sm rounded-3 bg-white p-4 h-100">
+            <h5 class="fw-bold mb-3 text-primary">
+                <i class="bi bi-calendar-check me-2"></i>Record Daily Attendance
+            </h5>
+            <form method="POST" action="{{ url_for('attendance') }}">
+                <div class="mb-3">
+                    <label for="enrollment_id" class="form-label fw-semibold text-secondary">
+                        Enrolled Student & Course <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-select" id="enrollment_id" name="enrollment_id" required>
+                        <option value="" disabled selected>-- Select Enrolled Student & Course --</option>
+                        {% for opt in enrollment_options %}
+                            <option value="{{ opt.enrollment_id }}">
+                                {{ opt.roll_number }} - {{ opt.student_name }} | {{ opt.course_code }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="attendance_date" class="form-label fw-semibold text-secondary">
+                        Attendance Date <span class="text-danger">*</span>
+                    </label>
+                    <input type="date" class="form-control" id="attendance_date" name="attendance_date" value="{{ today_date }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-secondary d-block">
+                        Status <span class="text-danger">*</span>
+                    </label>
+                    <div class="d-flex gap-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="status" id="status_present" value="Present" checked>
+                            <label class="form-check-label fw-semibold text-success" for="status_present">
+                                <i class="bi bi-check-circle-fill me-1"></i> Present
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="status" id="status_absent" value="Absent">
+                            <label class="form-check-label fw-semibold text-danger" for="status_absent">
+                                <i class="bi bi-x-circle-fill me-1"></i> Absent
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="remarks" class="form-label fw-semibold text-secondary">Remarks (Optional)</label>
+                    <input type="text" class="form-control" id="remarks" name="remarks" placeholder="e.g. Regular lecture, Lab session">
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-save2-fill me-1"></i> Save Attendance Entry
+                </button>
+            </form>
+            <div class="mt-3 text-muted small">
+                <i class="bi bi-info-circle me-1"></i> Unique constraint ensures no duplicate entries exist for the same student, course, and date.
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Student-wise Attendance Percentage Summary -->
+    <div class="col-12 col-xl-7">
+        <div class="card border-0 shadow-sm rounded-3 bg-white p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0 text-primary">
+                    <i class="bi bi-pie-chart-fill me-2"></i>Attendance Percentage Summary
+                </h5>
+                <span class="badge bg-light text-secondary border">Criterion: 75% Minimum</span>
+            </div>
+            <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                <table class="table table-sm table-custom align-middle">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th class="text-center">Total</th>
+                            <th class="text-center">Present</th>
+                            <th class="text-end">Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if attendance_summary %}
+                            {% for item in attendance_summary %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">{{ item.student_name }}</div>
+                                        <small class="text-muted font-monospace">{{ item.roll_number }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-primary border">{{ item.course_code }}</span>
+                                    </td>
+                                    <td class="text-center fw-medium">{{ item.total_sessions }}</td>
+                                    <td class="text-center text-success fw-bold">{{ item.present_sessions }}</td>
+                                    <td class="text-end">
+                                        {% if item.attendance_percentage >= 75.0 %}
+                                            <span class="badge badge-present">
+                                                {{ item.attendance_percentage }}%
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-absent" title="Attendance Shortage (<75%)">
+                                                {{ item.attendance_percentage }}% Shortage
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    No attendance metrics recorded yet.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. Full Attendance Records Log -->
+<div class="card-table-wrapper">
+    <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-journal-text text-primary me-2"></i>Attendance Log Entries
+        </h5>
+        <span class="badge bg-light text-secondary border">Total Entries: {{ attendance_logs|length }}</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-custom align-middle">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Student Name</th>
+                    <th>Roll Number</th>
+                    <th>Course</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if attendance_logs %}
+                    {% for log in attendance_logs %}
+                        <tr>
+                            <td><span class="text-muted fw-bold">#{{ log.attendance_id }}</span></td>
+                            <td class="fw-medium">{{ log.attendance_date }}</td>
+                            <td class="fw-semibold text-dark">{{ log.student_name }}</td>
+                            <td><span class="badge bg-light text-primary border font-monospace">{{ log.roll_number }}</span></td>
+                            <td><span class="badge bg-primary-subtle text-primary border">{{ log.course_code }}</span> {{ log.course_name }}</td>
+                            <td>
+                                {% if log.status == 'Present' %}
+                                    <span class="badge badge-present">
+                                        <i class="bi bi-check-circle me-1"></i>Present
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-absent">
+                                        <i class="bi bi-x-circle me-1"></i>Absent
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted small">{{ log.remarks or '-' }}</td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    <!-- Quick toggle status button for corrections -->
+                                    <form method="POST" action="{{ url_for('toggle_attendance', attendance_id=log.attendance_id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary" title="Toggle Status (Present/Absent correction)">
+                                            <i class="bi bi-arrow-repeat"></i> Toggle
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('delete_attendance', attendance_id=log.attendance_id) }}" class="delete-form d-inline" data-item-name="Attendance record #{{ log.attendance_id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Attendance">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            No attendance records logged yet.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

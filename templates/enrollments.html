@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Student Enrollments - College Management System{% endblock %}
+{% block page_title %}Student Course Enrollments{% endblock %}
+
+{% block content %}
+<!-- Enrollment Registration Card -->
+<div class="card border-0 shadow-sm rounded-3 bg-white p-4 mb-4">
+    <h5 class="fw-bold mb-3 text-primary">
+        <i class="bi bi-plus-circle-fill me-2"></i>Register New Course Enrollment
+    </h5>
+    <form method="POST" action="{{ url_for('enrollments') }}" class="row g-3 align-items-end">
+        <div class="col-md-5">
+            <label for="student_id" class="form-label fw-semibold text-secondary">
+                Select Student <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="student_id" name="student_id" required>
+                <option value="" disabled selected>-- Choose Student --</option>
+                {% for s in students %}
+                    <option value="{{ s.student_id }}">
+                        {{ s.roll_number }} - {{ s.full_name }} ({{ s.dept_code }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label for="course_id" class="form-label fw-semibold text-secondary">
+                Select Course <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="course_id" name="course_id" required>
+                <option value="" disabled selected>-- Choose Course --</option>
+                {% for c in courses %}
+                    <option value="{{ c.course_id }}">
+                        {{ c.course_code }}: {{ c.course_name }} ({{ c.credits }} Cr)
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-check-lg me-1"></i> Enroll Student
+            </button>
+        </div>
+    </form>
+
+    <div class="mt-3 p-2 bg-light border rounded small text-muted d-flex align-items-center">
+        <i class="bi bi-shield-check text-primary fs-5 me-2"></i>
+        <span><strong>Integrity Rule:</strong> Duplicate student-course registrations are rejected by MySQL constraint <code>uk_student_course UNIQUE(student_id, course_id)</code>. Removing an enrollment safely cascades to its associated attendance and marks.</span>
+    </div>
+</div>
+
+<!-- Active Registrations Table -->
+<div class="card-table-wrapper">
+    <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-card-checklist text-primary me-2"></i>Active Course Registrations
+        </h5>
+        <span class="badge bg-light text-secondary border">Total: {{ enrollments|length }}</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-custom align-middle">
+            <thead>
+                <tr>
+                    <th>Enrollment ID</th>
+                    <th>Student Name</th>
+                    <th>Roll Number</th>
+                    <th>Course Code & Title</th>
+                    <th>Instructor</th>
+                    <th>Enrollment Date</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if enrollments %}
+                    {% for e in enrollments %}
+                        <tr>
+                            <td><span class="text-muted fw-bold">#{{ e.enrollment_id }}</span></td>
+                            <td class="fw-semibold text-dark">{{ e.student_name }}</td>
+                            <td>
+                                <span class="badge bg-light text-primary border font-monospace">
+                                    {{ e.roll_number }}
+                                </span>
+                            </td>
+                            <td>
+                                <div><strong class="text-primary">{{ e.course_code }}</strong> - {{ e.course_name }}</div>
+                                <small class="text-muted">{{ e.dept_name }} | {{ e.credits }} Credits</small>
+                            </td>
+                            <td class="text-secondary">{{ e.faculty_name }}</td>
+                            <td>{{ e.enrollment_date }}</td>
+                            <td class="text-end">
+                                <form method="POST" action="{{ url_for('delete_enrollment', enrollment_id=e.enrollment_id) }}" 
+                                      class="delete-form d-inline" 
+                                      data-item-name="Enrollment for {{ e.student_name }} in {{ e.course_code }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Enrollment">
+                                        <i class="bi bi-trash-fill me-1"></i> Remove
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No active student enrollments found. Use the form above to register students into courses.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

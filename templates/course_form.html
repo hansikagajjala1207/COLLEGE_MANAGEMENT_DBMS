@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}{{ action }} Course - College Management System{% endblock %}
+{% block page_title %}{{ action }} Course Details{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3 bg-white p-4">
+            <div class="d-flex align-items-center justify-content-between pb-3 mb-4 border-bottom">
+                <h5 class="fw-bold mb-0 text-primary">
+                    <i class="bi bi-book-half me-2"></i>{{ action }} Curriculum Course
+                </h5>
+                <a href="{{ url_for('courses') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Courses
+                </a>
+            </div>
+
+            <form method="POST">
+                <div class="row g-3">
+                    <!-- Course Code -->
+                    <div class="col-md-6">
+                        <label for="course_code" class="form-label fw-semibold text-secondary">
+                            Course Code <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control font-monospace" id="course_code" name="course_code" 
+                               value="{{ course.course_code if course else '' }}" placeholder="e.g. CS301" required>
+                        <div class="form-text">Unique code identifier for the subject.</div>
+                    </div>
+
+                    <!-- Course Credits -->
+                    <div class="col-md-6">
+                        <label for="credits" class="form-label fw-semibold text-secondary">
+                            Credits <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" class="form-control" id="credits" name="credits" 
+                               value="{{ course.credits if course else 4 }}" min="1" max="10" required>
+                    </div>
+
+                    <!-- Course Name -->
+                    <div class="col-12">
+                        <label for="course_name" class="form-label fw-semibold text-secondary">
+                            Course Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="course_name" name="course_name" 
+                               value="{{ course.course_name if course else '' }}" placeholder="e.g. Database Management Systems" required>
+                    </div>
+
+                    <!-- Department -->
+                    <div class="col-md-6">
+                        <label for="dept_id" class="form-label fw-semibold text-secondary">
+                            Department <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="dept_id" name="dept_id" required>
+                            <option value="" disabled {% if not course %}selected{% endif %}>Select Department</option>
+                            {% for d in departments %}
+                                <option value="{{ d.dept_id }}" {% if course and course.dept_id == d.dept_id %}selected{% endif %}>
+                                    {{ d.dept_name }} ({{ d.dept_code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Faculty Instructor -->
+                    <div class="col-md-6">
+                        <label for="faculty_id" class="form-label fw-semibold text-secondary">
+                            Assigned Faculty Instructor <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="faculty_id" name="faculty_id" required>
+                            <option value="" disabled {% if not course %}selected{% endif %}>Select Faculty Member</option>
+                            {% for f in faculty_list %}
+                                <option value="{{ f.faculty_id }}" {% if course and course.faculty_id == f.faculty_id %}selected{% endif %}>
+                                    {{ f.faculty_name }} ({{ f.dept_code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Semester -->
+                    <div class="col-12">
+                        <label for="semester_id" class="form-label fw-semibold text-secondary">
+                            Semester <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="semester_id" name="semester_id" required>
+                            <option value="" disabled {% if not course %}selected{% endif %}>Select Semester</option>
+                            {% for s in semesters %}
+                                <option value="{{ s.semester_id }}" {% if course and course.semester_id == s.semester_id %}selected{% endif %}>
+                                    {{ s.semester_name }} ({{ s.academic_year }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
+                    <a href="{{ url_for('courses') }}" class="btn btn-light border px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check2-circle me-1"></i> Save Course
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

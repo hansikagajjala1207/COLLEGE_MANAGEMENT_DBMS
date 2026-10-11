@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - College Management System{% endblock %}
+{% block page_title %}College Administration Dashboard{% endblock %}
+
+{% block content %}
+<!-- Metric Cards Row -->
+<div class="row g-3 mb-4">
+    <!-- Total Students -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="metric-card">
+            <div class="metric-info">
+                <h6>Total Students</h6>
+                <div class="metric-value">{{ total_students }}</div>
+            </div>
+            <div class="metric-icon-box">
+                <i class="bi bi-people-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Faculty -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="metric-card">
+            <div class="metric-info">
+                <h6>Total Faculty</h6>
+                <div class="metric-value">{{ total_faculty }}</div>
+            </div>
+            <div class="metric-icon-box">
+                <i class="bi bi-person-badge-fill"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Departments -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="metric-card">
+            <div class="metric-info">
+                <h6>Total Departments</h6>
+                <div class="metric-value">{{ total_departments }}</div>
+            </div>
+            <div class="metric-icon-box">
+                <i class="bi bi-building"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Courses -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="metric-card">
+            <div class="metric-info">
+                <h6>Total Courses</h6>
+                <div class="metric-value">{{ total_courses }}</div>
+            </div>
+            <div class="metric-icon-box">
+                <i class="bi bi-book-fill"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Navigation Bar -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm p-3 bg-white rounded-3">
+            <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+                <span class="fw-semibold text-secondary">
+                    <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Quick Actions:
+                </span>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{{ url_for('add_student') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-person-plus-fill me-1"></i> Add Student
+                    </a>
+                    <a href="{{ url_for('add_faculty') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-person-badge me-1"></i> Add Faculty
+                    </a>
+                    <a href="{{ url_for('add_course') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-journal-plus me-1"></i> Add Course
+                    </a>
+                    <a href="{{ url_for('enrollments') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-plus-circle me-1"></i> Enroll Student
+                    </a>
+                    <a href="{{ url_for('attendance') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-check2-square me-1"></i> Mark Attendance
+                    </a>
+                    <a href="{{ url_for('exam_results') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-award me-1"></i> Enter Marks
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recently Enrolled Students Table -->
+<div class="card-table-wrapper">
+    <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
+        <h5 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-clock-history text-primary me-2"></i>Recently Added Students
+        </h5>
+        <a href="{{ url_for('students') }}" class="btn btn-sm btn-primary">
+            View All Students <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-custom align-middle">
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Full Name</th>
+                    <th>Department</th>
+                    <th>Email</th>
+                    <th>Gender</th>
+                    <th>Admission Year</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if recent_students %}
+                    {% for student in recent_students %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-light text-primary border fw-semibold">
+                                    {{ student.roll_number }}
+                                </span>
+                            </td>
+                            <td class="fw-medium text-dark">{{ student.full_name }}</td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary border">
+                                    {{ student.dept_name }} ({{ student.dept_code }})
+                                </span>
+                            </td>
+                            <td class="text-secondary">{{ student.email }}</td>
+                            <td>{{ student.gender }}</td>
+                            <td>{{ student.admission_year }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No student records found in the database.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
